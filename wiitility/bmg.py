@@ -9,7 +9,7 @@ type bmg_section = INF1Section | DAT1Section | FLW1Section | FLI1Section
 
 class BMG:
     """
-    BMG (Message Data) file handler for parsing and repacking binary message data.
+    BMG (Binary Message Data) file handler for parsing and repacking binary message data.
     The BMG class manages the structure of BMG files which contain multiple sections
     (INF1, DAT1, FLW1, FLI1) that store message information and data.
     Attributes:

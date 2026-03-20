@@ -4,6 +4,10 @@ from enum import IntEnum
 from typing import NamedTuple
 
 class TagIdentifier(IntEnum):
+    """
+    Identifies when a tag/action will be used when the console displays this in game.
+    This can range from delaying more text from appearing, playing a sound effect, coloring text, etc.
+    """
     delay = 0x01
     sound_effect = 0x02
     load_image = 0x03
@@ -16,6 +20,9 @@ class TagIdentifier(IntEnum):
     colour_text = 0xff
 
 class Tag:
+    """
+    Container object for one or more tags that will be used within a Message object.
+    """
     def __init__(self,
                  offset: int,
                  size: int,
@@ -50,6 +57,10 @@ class Tag:
         return data
 
 class Message(NamedTuple):
+    """
+    The collection of a single or multi-lined message that will be displayed in an event, sign, message bubble, etc.
+    This also contains the list of actions/tags that will occur with the given message.
+    """
     string: str
     tags: list[Tag]
 
