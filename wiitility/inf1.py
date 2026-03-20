@@ -112,6 +112,7 @@ class INF1Section:
     data_offset = 0x8
     entry_size = 0xC
     entries: list[INF1Entry]
+    magic: str = "INF1"
 
     def __init__(self, entries: list[INF1Entry] = []):
         # Make sure list is of INF1Entry

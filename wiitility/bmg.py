@@ -98,6 +98,15 @@ class BMG:
 
         return data
     
+    def get_section(self, section_magic: str) -> list[bmg_section]:
+        out: list[bmg_section] = []
+
+        for section in self.sections:
+            if section.magic == section_magic:
+                out.append(section)
+        
+        return out
+
     def repack_bmg(self) -> BytesIO:
         data = BytesIO()
 

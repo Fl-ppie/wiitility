@@ -73,6 +73,8 @@ class DAT1Section:
     Attributes:
         messages (list[Message]): A list of Message objects contained in this section.
     """
+    magic: str = "DAT1"
+
     def __init__(self, messages: list[Message] = []):
         self.messages: list[Message] = messages
     

@@ -32,6 +32,7 @@ class FLI1Section:
         repack_section(): Serializes the section and its entries back into binary data.
     """
     entry_size = 0x8
+    magic: str = "FLI1"
 
     def __init__(self, entries: list[FLI1Entry] = []):
         self.entry_count = len(entries)
