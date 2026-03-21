@@ -140,6 +140,7 @@ class FLW1Section:
     """
     flow_nodes: list[flw_node]
     branch_nodes: list[int]
+    magic: str = "FLW1"
 
     def __init__(self, flow_nodes: list[flw_node] = [], branch_nodes: list[int] = []):
         self.flow_node_count = len(flow_nodes)

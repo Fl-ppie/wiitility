@@ -73,6 +73,8 @@ class DAT1Section:
     Attributes:
         messages (list[Message]): A list of Message objects contained in this section.
     """
+    magic: str = "DAT1"
+
     def __init__(self, messages: list[Message] = []):
         self.messages: list[Message] = messages
     
@@ -95,10 +97,8 @@ class DAT1Section:
                 tag = Tag.unpack_tag(raw_bytes, offset)
                 tags.append(tag)
             else:
-                if char_bytes[0] == b'\x00':
-                    string += char_bytes.decode('utf-8')
-                else:
-                    string += char_bytes.decode('shift-jis')
+                int_value = int.from_bytes(char_bytes)
+                string += chr(int_value)
             
             if char_bytes == b'\x00\x00': # Reading a null character
                 message = Message(string, tags)
@@ -128,7 +128,8 @@ class DAT1Section:
                     tag_data = tag.repack_tag()
                     data.write(tag_data.getvalue())
                 
-                char_bytes = char.encode('shift-jis')
+                int_value = ord(char)
+                char_bytes = int.to_bytes(int_value, 2, 'big')
                 data.write(char_bytes)
             
             if not string:
