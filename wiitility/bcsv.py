@@ -190,30 +190,32 @@ class BCSVField:
 
 
 class BCSVEntry(dict[BCSVKey, BCSVValue]):
+    hash_names: dict[int, str] = {}
+
     @staticmethod
-    def find_field(bcsv_field: BCSVKey) -> int | None:
+    def find_field(bcsv_field: BCSVKey) -> str | None:
         """Finds a specific BCSV field by its hash value or field name. Can return None as well if no field found."""
         if isinstance(bcsv_field, int):
-            return bcsv_field
+            return BCSVEntry.hash_names[bcsv_field] if bcsv_field in BCSVEntry.hash_names else None
         elif isinstance(bcsv_field, str):
-            return calculate_field_hash(bcsv_field)
+            return bcsv_field
         elif isinstance(bcsv_field, BCSVField):
-            return bcsv_field.field_hash
+            return bcsv_field.field_name
         else:
             return None
 
 
     def __getitem__(self, key: BCSVKey) -> BCSVValue:
-        bcsv_hash: int = BCSVEntry.find_field(key)
-        return super().__getitem__(bcsv_hash)
+        field_name: str = BCSVEntry.find_field(key)
+        return super().__getitem__(field_name)
 
 
     def __setitem__(self, key: BCSVKey, value: BCSVValue):
         if not isinstance(value, int | float | str):
             raise TypeError(f"Provided value {value} is not of valid types: {type(BCSVValue)}")
 
-        bcsv_hash: int = BCSVEntry.find_field(key)
-        super().__setitem__(bcsv_hash, value)
+        field_name: str = BCSVEntry.find_field(key)
+        super().__setitem__(field_name, value)
 
 
 class BCSV:
@@ -249,7 +251,9 @@ class BCSV:
             raise BCSVFileError("Provided BCSV BytesIO is not in a valid format.")
 
         if field_names is None:
-            field_names = {}
+            BCSVEntry.hash_names = {}
+        else:
+            BCSVEntry.hash_names = field_names
 
         bcsv: BCSV = cls() # initialize the class with some empty entry/field lists.
         entry_count: int = bh.read_u32(raw_data, 0x0)
