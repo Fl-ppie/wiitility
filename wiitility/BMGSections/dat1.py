@@ -1,7 +1,10 @@
 from io import BytesIO
-import bytes_helpers as bh
 from enum import IntEnum
 from typing import NamedTuple
+import wiitility.bytes_helpers as bh
+from wiitility.BMGSections.bmg_section import BMGSection
+
+DAT1_MAGIC: str = "DAT1"
 
 class TagIdentifier(IntEnum):
     """
@@ -38,14 +41,14 @@ class Tag:
         self.data = data
 
     @classmethod
-    def unpack_tag(self, raw_bytes: BytesIO, offset: int):
+    def import_tag(self, raw_bytes: BytesIO, offset: int):
         size = int.from_bytes(raw_bytes.read(1), "big")
         identifier = int.from_bytes(raw_bytes.read(1), "big")
         data = raw_bytes.read(size - 4)
 
         return Tag(offset, size, identifier, data)
 
-    def repack_tag(self) -> BytesIO:
+    def export_tag(self) -> BytesIO:
         assert isinstance(self.data, bytes)
         data = BytesIO()
 
@@ -64,7 +67,7 @@ class Message(NamedTuple):
     string: str
     tags: list[Tag]
 
-class DAT1Section:
+class DAT1Section(BMGSection):
     """
     Represents a section of DAT1 message data containing multiple messages with their associated tags.
     This class handles the serialization and deserialization of message sections encoded in a binary format
@@ -73,16 +76,18 @@ class DAT1Section:
     Attributes:
         messages (list[Message]): A list of Message objects contained in this section.
     """
-    magic: str = "DAT1"
+    def __init__(self, messages: list[Message] = None):
+        super().__init__(DAT1_MAGIC)
 
-    def __init__(self, messages: list[Message] = []):
+        if messages == None:
+            messages = []
         self.messages: list[Message] = messages
     
     def add_message(self, message: Message):
         self.messages.append(message)
     
     @classmethod
-    def unpack_section(cls, raw_bytes: BytesIO):
+    def import_section(cls, raw_bytes: BytesIO):
         data_length = raw_bytes.seek(0, 2)
         section = cls()
 
@@ -94,7 +99,7 @@ class DAT1Section:
             char_bytes = raw_bytes.read(2)
             if char_bytes == b'\x00\x1A': # Found a tag
                 offset = len(string)
-                tag = Tag.unpack_tag(raw_bytes, offset)
+                tag = Tag.import_tag(raw_bytes, offset)
                 tags.append(tag)
             else:
                 int_value = int.from_bytes(char_bytes)
@@ -109,9 +114,9 @@ class DAT1Section:
         
         return section
         
-    def repack_section(self) -> BytesIO:
+    def export_section(self) -> BytesIO:
         """
-        Repack message section by serializing messages with their tags and characters into binary data.
+        Export message section by serializing messages with their tags and characters into binary data.
         Iterates through each message's characters and associated tags, writing tag data before each character
         and any closing tags at the end of the string, encoding characters in Shift-JIS format.
         """
@@ -125,7 +130,7 @@ class DAT1Section:
             for offset, char in enumerate(string):
                 current_tags = [tag for tag in tags if tag.offset == offset]
                 for tag in current_tags:
-                    tag_data = tag.repack_tag()
+                    tag_data = tag.export_tag()
                     data.write(tag_data.getvalue())
                 
                 int_value = ord(char)
@@ -138,7 +143,7 @@ class DAT1Section:
             # Since message.string does not contains the tags themselves, we must also check to see if there are tags at the end of the string
             closing_tags = [tag for tag in tags if tag.offset == offset + 1]
             for tag in closing_tags:
-                tag_data = tag.repack_tag()
+                tag_data = tag.export_tag()
                 data.write(tag_data.getvalue())
                 
         return data
