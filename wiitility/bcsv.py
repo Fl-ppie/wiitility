@@ -358,6 +358,13 @@ class BCSV:
 
         # Add the string pool bytes into BCSV data.
         bh.write_bytes(bcsv_data, offset, string_pool_bytes.getvalue())
+
+        # BCSV Files are then padded with @ if their file size are not divisible by 32.
+        curr_length = bcsv_data.seek(0, 2)
+        if curr_length % 32 > 0:
+            bcsv_data.seek(curr_length)
+            bh.write_str(bcsv_data, curr_length, "", 32 - (curr_length % 32), "@".encode("shift-jis"))
+
         return bcsv_data
 
 
