@@ -14,7 +14,10 @@ def read_bool(data: BytesIO, offset: int, shift: int = 0) -> bool:
     if offset + length > data_length:
         raise ByteHelperError(f"Offset {str(offset)} + Length {str(length)} is longer than the data size {str(data_length)}.")
     data.seek(offset)
-    return struct.unpack(">b", data.read(length))[0] >> shift
+    value = struct.unpack(">b", data.read(length))[0] >> shift
+    if value == 1:
+        return True
+    return False
 
 def read_u8(data: BytesIO, offset: int) -> int:
     data_length = data.seek(offset, 2)
