@@ -8,16 +8,18 @@ class ByteHelperError(Exception):
 
 GC_ENCODING_STR = "shift_jis"
 
-def read_bool(data: BytesIO, offset: int, shift: int = 0) -> bool:
+def read_bitfield(data: BytesIO, offset: int, length: int, shift: int) -> bool:
     data_length = data.seek(offset, 2)
-    length = 1
     if offset + length > data_length:
         raise ByteHelperError(f"Offset {str(offset)} + Length {str(length)} is longer than the data size {str(data_length)}.")
-    data.seek(offset)
-    value = struct.unpack(">b", data.read(length))[0] >> shift
-    if value == 1:
-        return True
-    return False
+    value = int.from_bytes(read_bytes(data, offset, length))
+    return bool((value >> shift) & 1)
+
+def read_bool(data: BytesIO, offset: int) -> bool:
+    data_length = data.seek(offset, 2)
+    if offset > data_length:
+        raise ByteHelperError(f"Offset {str(offset)} is longer than the data size {str(data_length)}.")
+    return read_bitfield(data, offset, 1, 0)
 
 def read_u8(data: BytesIO, offset: int) -> int:
     data_length = data.seek(offset, 2)
