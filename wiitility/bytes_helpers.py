@@ -100,7 +100,6 @@ def read_float(data: BytesIO, offset: int) -> int:
     data.seek(offset)
     return struct.unpack(">f", data.read(length))[0]
 
-
 def write_u8(data: BytesIO, offset: int, new_value: int):
     new_bytes = struct.pack(">B", new_value)
     data.seek(offset)
@@ -149,6 +148,20 @@ def write_float(data: BytesIO, offset: int, new_value: float):
     new_bytes = struct.pack(">f", new_value)
     data.seek(offset)
     data.write(new_bytes)
+
+def align(data: BytesIO, alignment: int, padding: str | bytes) -> int:
+    data_length = data.seek(0, 2)
+    padding_length = 0
+    if data_length % alignment != 0:
+        padding_length = alignment - data_length % alignment
+        if isinstance(padding, bytes):
+            assert len(padding) == 1
+            write_bytes(data, data_length, padding * padding_length)
+        elif isinstance(padding, str):
+            assert len(padding) >= padding_length
+            write_str(data, data_length, padding[:padding_length], padding_length)
+    return data_length + padding_length
+
 
 def read_str(data: BytesIO, offset: int, max_length: int = -1) -> str:
     data_length = data.seek(offset, 2)
