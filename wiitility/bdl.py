@@ -91,8 +91,6 @@ class BDL:
             bh.write_str(data, offset, magic, 4)
             bh.write_u32(data, offset + 0x4, section_size)
             offset += section_size
-
-            print(magic, section_size)
         
         bh.write_u32(data, vertex_count_position, vertex_count)
 
