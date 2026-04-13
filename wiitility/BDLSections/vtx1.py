@@ -57,6 +57,9 @@ class Vec3:
         self.y = y
         self.z = z
 
+    def __str__(self) -> str:
+        return [self.x, self.y, self.z]
+
 AttributeToOffset = {
     AttributeType.POSITION: 0xC,
     AttributeType.NORMAL: 0x10,
@@ -273,7 +276,7 @@ class VTX1Section(BDLSection):
                 write_callback(data, offset + 2 * size, cast(z))
 
                 offset += 3 * size
-
+                
             offset = bh.align(data, 0x20, PADDING)
 
             if vertex_format.attribute_type == AttributeType.POSITION:
