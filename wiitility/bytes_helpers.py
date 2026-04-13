@@ -45,6 +45,14 @@ def read_u32(data: BytesIO, offset: int) -> int:
     data.seek(offset)
     return struct.unpack(">I", data.read(length))[0]
 
+def read_u64(data: BytesIO, offset: int) -> int:
+    data_length = data.seek(offset, 2)
+    length = 8
+    if offset + length > data_length:
+        raise ByteHelperError(f"Offset {str(offset)} + Length {str(length)} is longer than the data size {str(data_length)}.")
+    data.seek(offset)
+    return struct.unpack(">Q", data.read(length))[0]
+
 def read_s8(data: BytesIO, offset: int) -> int:
     data_length = data.seek(offset, 2)
     length = 1
@@ -68,6 +76,14 @@ def read_s32(data: BytesIO, offset: int) -> int:
         raise ByteHelperError(f"Offset {str(offset)} + Length {str(length)} is longer than the data size {str(data_length)}.")
     data.seek(offset)
     return struct.unpack(">i", data.read(length))[0]
+
+def read_s64(data: BytesIO, offset: int) -> int:
+    data_length = data.seek(offset, 2)
+    length = 8
+    if offset + length > data_length:
+        raise ByteHelperError(f"Offset {str(offset)} + Length {str(length)} is longer than the data size {str(data_length)}.")
+    data.seek(offset)
+    return struct.unpack(">q", data.read(length))[0]
 
 def read_bytes(data: BytesIO, offset: int, size: int = -1) -> bytes:
     data_length = data.seek(offset, 2)
@@ -100,6 +116,11 @@ def write_u32(data: BytesIO, offset: int, new_value: int):
     data.seek(offset)
     data.write(new_bytes)
 
+def write_u64(data: BytesIO, offset: int, new_value: int):
+    new_bytes = struct.pack(">Q", new_value)
+    data.seek(offset)
+    data.write(new_bytes)
+
 def write_s8(data: BytesIO, offset: int, new_value: int):
     new_bytes = struct.pack(">b", new_value)
     data.seek(offset)
@@ -112,6 +133,11 @@ def write_s16(data: BytesIO, offset: int, new_value: int):
 
 def write_s32(data: BytesIO, offset: int, new_value: int):
     new_bytes = struct.pack(">i", new_value)
+    data.seek(offset)
+    data.write(new_bytes)
+
+def write_s64(data: BytesIO, offset: int, new_value: int):
+    new_bytes = struct.pack(">q", new_value)
     data.seek(offset)
     data.write(new_bytes)
 
